@@ -1,0 +1,6 @@
+# requirements.txt 內容
+Flask
+pandas
+numpy
+scikit-learn
+gunicorn # 生產環境專用 Web Server
