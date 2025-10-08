@@ -11,27 +11,21 @@ app = Flask(__name__)
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        # 1. 嘗試從標準 JSON 體獲取數據 (Flask 預設行為)
+        # 1. 嘗試從標準 JSON 體獲取數據 (Flask 預期 Raw JSON)
         data = request.json
         
-        # 2. 如果標準 JSON 體獲取失敗，則嘗試手動解析其他格式的數據
+        # 2. 如果標準 JSON 體獲取失敗，嘗試從原始請求體解析
         if not data and request.data:
-            
-            # 嘗試解析 URL 編碼的表單數據 (如果 Make 採用 x-www-form-urlencoded 模式)
-            # Make 會將整個 JSON 字串放在一個名為 'data' 的 field 裡
-            if request.form and 'data' in request.form:
-                data_string = request.form['data']
-                # 再次手動解析這個 JSON 字串 (使用 json.loads)
-                data = json.loads(data_string) 
-            
-            # 如果以上都失敗，再嘗試將原始請求體解析為 JSON
-            elif request.data:
-                data = json.loads(request.data.decode('utf-8'))
+            data = json.loads(request.data.decode('utf-8'))
 
 
         # 3. 檢查數據是否為我們預期的列表格式
         if not data or not isinstance(data, list):
+            # 如果數據傳輸完全失敗，記錄傳入的內容以便於診斷
+            Logger.log(f"Received malformed data: {request.data}") 
             return jsonify({"error": "Invalid data format. Expected a list."}), 400
+        
+       
 
         # 4. 提取關鍵欄位
         
